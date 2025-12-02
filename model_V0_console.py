@@ -63,7 +63,8 @@ capa_appro_fourn = {("four_1","mp_1"):0,("four_1","mp_2"):112,("four_1","mp_3"):
 # ----------------------------------------
 # 3. CRÉATION DU MODÈLE
 # ----------------------------------------
-model = gp.Model("Template_MILP")
+model = gp.Model("modele_optimisation_V0")
+#Le commit est fait
 
 
 # ----------------------------------------
