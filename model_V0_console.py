@@ -40,8 +40,7 @@ cost_MPremiere={("four_1","mp_1"):1, ("four_1","mp_2"):4, ("four_1","mp_3"):3, (
                 ("four_2","mp_1"):3, ("four_2","mp_2"):2, ("four_2","mp_3"):7, ("four_2","mp_4"):6,
                 ("four_3","mp_1"):2, ("four_3","mp_2"):4, ("four_3","mp_3"):3, ("four_3","mp_4"):2}
 #Cout d installation ###costinstal(u)
-cost_install_usines={"usine_1": 10,"usine_2": 11}
-cost_select_fournisseurs={"four_1": 10,"four_2": 11,"four_3": 13}
+cost_install_usines={"usine_1": 10000,"usine_2": 11}
 
 #Ratio Matieres premiere par produit ###ratio_pro_mp(p,r)
 ratio_pro_mp = {("prod_1","mp_1"):2,("prod_1","mp_2"):1,("prod_1","mp_3"):1,("prod_1","mp_4"):1,
@@ -134,7 +133,7 @@ for u in USINES:
 
 for f in FOURNISSEURS:
     model.addConstr(F_SELECT[f] >=0, name="positif constraint")
-
+    
 for u in USINES:
     model.addConstr(U_SELECT[u] >=0, name="positif constraint")
 
@@ -152,10 +151,10 @@ for f in FOURNISSEURS:
 # ----------------------------------------
 
 #cout d'achat de la matiere premiere
-APPROV_cost = quicksum(Q_APPRO[f,r]*cost_MPremiere[f,r] + F_SELECT[f] for f in FOURNISSEURS for r in MATIERES_PREMIERES)
+APPROV_cost = quicksum(Q_APPRO[f,r]*cost_MPremiere[f,r] + F_SELECT[f]*cost_select_fournisseurs[f] for f in FOURNISSEURS for r in MATIERES_PREMIERES)
 
 #cout total de production 
-PROD_cost = quicksum(Q_PROD[u,p]*cost_prod[u,p] + U_SELECT[u] for u in USINES for p in PRODUITS)
+PROD_cost = quicksum(Q_PROD[u,p]*cost_prod[u,p] + U_SELECT[u]*cost_install_usines[u] for u in USINES for p in PRODUITS)
 
 TOTAL_cost = APPROV_cost + PROD_cost
 
@@ -176,7 +175,7 @@ if model.status == GRB.OPTIMAL:
 
     print("\n=== SOLUTION OPTIMALE ===\n")
 
-    print("--- Variables x[i,j] ---")
+    print("--- Variables FOURNISSEURS MATIERE PREMIERE ---")
     for f, r in Q_APPRO:
         if Q_APPRO[f, r].X > 1e-6:  # eviter les +0.0
             print(f"Q_APPRO[{f},{r}] = {Q_APPRO[f,r].X}")
@@ -184,6 +183,17 @@ if model.status == GRB.OPTIMAL:
     print("\n--- Variables F_SELECT[f] ---")
     for f in F_SELECT:
         print(f"F_SELECT[{f}] = {F_SELECT[f].X}")
+
+        ##################################
+
+    print("--- Variables SITE DE PRODUCTION ---")
+    for u, p in Q_PROD:
+        if Q_PROD[u, p].X > 1e-6:  # eviter les +0.0
+            print(f"Q_PROD[{u},{p}] = {Q_PROD[u,p].X}")
+
+    print("\n--- Variables U_SELECT[u] ---")
+    for u in U_SELECT:
+        print(f"U_SELECT[{u}] = {U_SELECT[u].X}")
 
 else:
     print("Aucune solution optimale trouvee.")
