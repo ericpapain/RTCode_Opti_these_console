@@ -169,3 +169,32 @@ model.setObjective(TOTAL_cost,GRB.MINIMIZE)
 model.optimize()
 
 
+# ----------------------------------------
+# 8. EXTRACTION DES RESULTATS
+# ----------------------------------------
+if model.status == GRB.OPTIMAL:
+
+    print("\n=== SOLUTION OPTIMALE ===\n")
+
+    print("--- Variables x[i,j] ---")
+    for f, r in Q_APPRO:
+        if Q_APPRO[f, r].X > 1e-6:  # eviter les +0.0
+            print(f"Q_APPRO[{f},{r}] = {Q_APPRO[f,r].X}")
+
+    print("\n--- Variables F_SELECT[f] ---")
+    for f in F_SELECT:
+        print(f"F_SELECT[{f}] = {F_SELECT[f].X}")
+
+else:
+    print("Aucune solution optimale trouvée.")
+
+
+# ----------------------------------------
+# 9. EXPORT DU MODÈLE (OPTIONNEL)
+# ----------------------------------------
+# Pour exporter le modèle sous forme LP ou MPS :
+# model.write("modele.lp")
+# model.write("modele.mps")
+
+
+
