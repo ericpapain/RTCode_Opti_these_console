@@ -33,7 +33,7 @@ BigM = 1000
 
 #Parametres de cout
 # Cout de production par Usine  #cost_prod(U?P)
-cost_prod={("usine_1","prod_1"):2, ("usine_1","prod_2"):6, ("usine_1","prod_3"):3, ("usine_1""prod_4"):7, ("usine_1""prod_5"):5,
+cost_prod={("usine_1","prod_1"):2, ("usine_1","prod_2"):6, ("usine_1","prod_3"):3, ("usine_1","prod_4"):7, ("usine_1","prod_5"):5,
           ("usine_2","prod_1"):5, ("usine_2","prod_2"):3, ("usine_2","prod_3"):8, ("usine_2","prod_4"):2, ("usine_2","prod_5"):6}
 # Cout de la matiere premiere par fournisseur  ###cosMP(f,r)
 cost_MPremiere={("four_1","mp_1"):1, ("four_1","mp_2"):4, ("four_1","mp_3"):3, ("four_1","mp_4"):5,
@@ -44,29 +44,29 @@ cost_install_usines={"usine_1": 10,"usine_2": 11}
 cost_select_fournisseurs={"four_1": 10,"four_2": 11,"four_3": 13}
 
 #Ratio Matieres premiere par produit ###ratio_pro_mp(p,r)
-ratio_pro_mp = {("prod_1","mp_1"):5,("prod_1","mp_2"):0,("prod_1","mp_3"):1,("prod_1","mp_4"):19,
-                      ("prod_2","mp_1"):7,("prod_2","mp_2"):0,("prod_2","mp_3"):15,("prod_2","mp_4"):13,
-                      ("prod_3","mp_1"):0,("prod_3","mp_2"):11,("prod_3","mp_3"):12,("prod_3","mp_4"):1,
-                      ("prod_4","mp_1"):2,("prod_4","mp_2"):9,("prod_4","mp_3"):0,("prod_4","mp_4"):1,
-                      ("prod_5","mp_1"):6,("prod_5","mp_2"):2,("prod_5","mp_3"):1,("prod_5","mp_4"):0}
+ratio_pro_mp = {("prod_1","mp_1"):2,("prod_1","mp_2"):1,("prod_1","mp_3"):1,("prod_1","mp_4"):1,
+                      ("prod_2","mp_1"):1,("prod_2","mp_2"):1,("prod_2","mp_3"):1,("prod_2","mp_4"):1,
+                      ("prod_3","mp_1"):1,("prod_3","mp_2"):1,("prod_3","mp_3"):2,("prod_3","mp_4"):1,
+                      ("prod_4","mp_1"):2,("prod_4","mp_2"):2,("prod_4","mp_3"):1,("prod_4","mp_4"):1,
+                      ("prod_5","mp_1"):1,("prod_5","mp_2"):2,("prod_5","mp_3"):1,("prod_5","mp_4"):1}
 
 #Definition des capacites
 #Capacite maximal de prodcution par site ###capa_prod(u,p)
-capa_prod = {("usine_1","prod_1"):546,("usine_1","prod_2"):0,("usine_1","prod_3"):162,("usine_1","prod_4"):321,("usine_1","prod_5"):120,
-                   ("usine_2","prod_1"):406,("usine_2","prod_2"):95,("usine_2","prod_3"):432,("usine_2","prod_4"):0,("usine_2","prod_5"):540}
+capa_prod = {("usine_1","prod_1"):546,("usine_1","prod_2"):110,("usine_1","prod_3"):162,("usine_1","prod_4"):321,("usine_1","prod_5"):120,
+                   ("usine_2","prod_1"):406,("usine_2","prod_2"):195,("usine_2","prod_3"):432,("usine_2","prod_4"):220,("usine_2","prod_5"):540}
 
 #Capacite Matiere premiere par fournisseurs ###capa_appro(f,r)
-capa_appro = {("four_1","mp_1"):0,("four_1","mp_2"):112,("four_1","mp_3"):62,("four_1","mp_4"):210,
-                  ("four_2","mp_1"):352,("four_2","mp_2"):0,("four_2","mp_3"):65,("four_2","mp_4"):113,
-                  ("four_3","mp_1"):221,("four_3","mp_2"):872,("four_3","mp_3"):0,("four_3","mp_4"):110}
+capa_appro = {("four_1","mp_1"):0,("four_1","mp_2"):112,("four_1","mp_3"):612,("four_1","mp_4"):210,
+                  ("four_2","mp_1"):352,("four_2","mp_2"):110,("four_2","mp_3"):65,("four_2","mp_4"):113,
+                  ("four_3","mp_1"):0,("four_3","mp_2"):0,("four_3","mp_3"):0,("four_3","mp_4"):0}
 
 
 #DEMANDE DE PRODUCTION 
-Dmde = {"prod_1" : 101,
-       "prod_2" : 92,
-       "prod_3" : 122,
-       "prod_4" : 181,
-       "prod_5" : 178}
+Dmde = {"prod_1" : 10,
+       "prod_2" : 9,
+       "prod_3" : 22,
+       "prod_4" : 11,
+       "prod_5" : 18}
 
 # ----------------------------------------
 # 3. CREATION DU MODELE
@@ -125,7 +125,7 @@ for p in PRODUITS:
 # 5.2 Satisfaction de la demande
 for p in PRODUITS:
     prod_total = quicksum(Q_PROD[u,p] for u in USINES)
-    model.addConstr(Dmde <= prod_total, name=f"prod_{u}")
+    model.addConstr(Dmde[p] <= prod_total, name=f"prod_{u}")
 
 # 5.3 Contraintes de non negativites
 for u in USINES:
@@ -136,13 +136,13 @@ for f in FOURNISSEURS:
     model.addConstr(F_SELECT[f] >=0, name="positif constraint")
 
 for u in USINES:
-    model.addConstr(U_SELECT[u] >=, name="positif constraint")
+    model.addConstr(U_SELECT[u] >=0, name="positif constraint")
 
 for f in FOURNISSEURS:
     for r in MATIERES_PREMIERES:
         model.addConstr(Q_APPRO[f,r] >=0, name="positif constraint")
 
-# 5.3 Toute autre contrainte spécifique
+# 5.3 Toute autre contrainte specifique
 # Exemple :
 # model.addConstr(x["A","X"] <= 10, name="example_limit")
 
@@ -151,15 +151,15 @@ for f in FOURNISSEURS:
 # 6. FONCTION OBJECTIF
 # ----------------------------------------
 
-#cout d'achat de la matière première
-APPROV_cost = quicksum(Q_APPRO[f,r]*cost_MPremiere[f,r] for f in FOURNISSEURS for r in MATIERES_PREMIERES)
+#cout d'achat de la matiere premiere
+APPROV_cost = quicksum(Q_APPRO[f,r]*cost_MPremiere[f,r] + F_SELECT[f] for f in FOURNISSEURS for r in MATIERES_PREMIERES)
 
 #cout total de production 
-PROD_cost = quicksum(Q_PROD[u,p]*cost_prod[u,p] for u in USINES for p in PRODUITS)
+PROD_cost = quicksum(Q_PROD[u,p]*cost_prod[u,p] + U_SELECT[u] for u in USINES for p in PRODUITS)
 
-TOTAL_cost = APPROV_cost + PROD_cost 
+TOTAL_cost = APPROV_cost + PROD_cost
 
-# Minimiser le coût total
+# Minimiser le cout total
 model.setObjective(TOTAL_cost,GRB.MINIMIZE)
 
 
@@ -186,13 +186,13 @@ if model.status == GRB.OPTIMAL:
         print(f"F_SELECT[{f}] = {F_SELECT[f].X}")
 
 else:
-    print("Aucune solution optimale trouvée.")
+    print("Aucune solution optimale trouvee.")
 
 
 # ----------------------------------------
-# 9. EXPORT DU MODÈLE (OPTIONNEL)
+# 9. EXPORT DU MODELE (OPTIONNEL)
 # ----------------------------------------
-# Pour exporter le modèle sous forme LP ou MPS :
+# Pour exporter le modele sous forme LP ou MPS :
 # model.write("modele.lp")
 # model.write("modele.mps")
 
