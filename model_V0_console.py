@@ -17,7 +17,7 @@ Structure :
 # 1. IMPORTATION
 # ----------------------------------------
 import gurobipy as gp
-from gurobipy import GRB
+from gurobipy import GRB, quicksum
 
 # ----------------------------------------
 # 2. DONNEES ET PARAMETRES
@@ -32,9 +32,9 @@ FOURNISSEURS = ["four_1","four_2","four_3"]                   #F=3
 BigM = 1000
 
 #Parametres de cout
-# Cout de production par Usine  #cost_prod(p,u)
-cost_prod={("prod_1","usine_1"):2, ("prod_2","usine_1"):6, ("prod_3","usine_1"):3, ("prod_4","usine_1"):7, ("prod_5","usine_1"):5,
-          ("prod_1","usine_2"):5, ("prod_2","usine_2"):3, ("prod_3","usine_2"):8, ("prod_4","usine_2"):2, ("prod_5","usine_2"):6}
+# Cout de production par Usine  #cost_prod(U?P)
+cost_prod={("usine_1","prod_1"):2, ("usine_1","prod_2"):6, ("usine_1","prod_3"):3, ("usine_1""prod_4"):7, ("usine_1""prod_5"):5,
+          ("usine_2","prod_1"):5, ("usine_2","prod_2"):3, ("usine_2","prod_3"):8, ("usine_2","prod_4"):2, ("usine_2","prod_5"):6}
 # Cout de la matiere premiere par fournisseur  ###cosMP(f,r)
 cost_MPremiere={("four_1","mp_1"):1, ("four_1","mp_2"):4, ("four_1","mp_3"):3, ("four_1","mp_4"):5,
                 ("four_2","mp_1"):3, ("four_2","mp_2"):2, ("four_2","mp_3"):7, ("four_2","mp_4"):6,
@@ -150,46 +150,22 @@ for f in FOURNISSEURS:
 # ----------------------------------------
 # 6. FONCTION OBJECTIF
 # ----------------------------------------
-# Minimiser le coût total
 
-model.setObjective(
-    gp.quicksum(cost[i, j] * x[i, j] for i in I for j in J),
-    GRB.MINIMIZE
-)
+#cout d'achat de la matière première
+APPROV_cost = quicksum(Q_APPRO[f,r]*cost_MPremiere[f,r] for f in FOURNISSEURS for r in MATIERES_PREMIERES)
+
+#cout total de production 
+PROD_cost = quicksum(Q_PROD[u,p]*cost_prod[u,p] for u in USINES for p in PRODUITS)
+
+TOTAL_cost = APPROV_cost + PROD_cost 
+
+# Minimiser le coût total
+model.setObjective(TOTAL_cost,GRB.MINIMIZE)
 
 
 # ----------------------------------------
 # 7. OPTIMISATION
 # ----------------------------------------
 model.optimize()
-
-
-# ----------------------------------------
-# 8. EXTRACTION DES RÉSULTATS
-# ----------------------------------------
-if model.status == GRB.OPTIMAL:
-
-    print("\n=== SOLUTION OPTIMALE ===\n")
-
-    print("--- Variables x[i,j] ---")
-    for i, j in x:
-        if x[i, j].X > 1e-6:  # éviter les +0.0
-            print(f"x[{i},{j}] = {x[i,j].X}")
-
-    print("\n--- Variables y[i] ---")
-    for i in y:
-        print(f"y[{i}] = {y[i].X}")
-
-else:
-    print("Aucune solution optimale trouvée.")
-
-
-# ----------------------------------------
-# 9. EXPORT DU MODÈLE (OPTIONNEL)
-# ----------------------------------------
-# Pour exporter le modèle sous forme LP ou MPS :
-# model.write("modele.lp")
-# model.write("modele.mps")
-
 
 
