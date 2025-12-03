@@ -41,7 +41,6 @@ cost_MPremiere={("four_1","mp_1"):1, ("four_1","mp_2"):4, ("four_1","mp_3"):3, (
                 ("four_3","mp_1"):2, ("four_3","mp_2"):4, ("four_3","mp_3"):3, ("four_3","mp_4"):2}
 #Cout d installation ###costinstal(u)
 cost_install_usines={"usine_1": 10000,"usine_2": 11}
-cost_select_fournisseurs={"four_1": 10,"four_2": 11,"four_3": 13}
 
 #Ratio Matieres premiere par produit ###ratio_pro_mp(p,r)
 ratio_pro_mp = {("prod_1","mp_1"):2,("prod_1","mp_2"):1,("prod_1","mp_3"):1,("prod_1","mp_4"):1,
@@ -134,7 +133,7 @@ for u in USINES:
 
 for f in FOURNISSEURS:
     model.addConstr(F_SELECT[f] >=0, name="positif constraint")
-
+    
 for u in USINES:
     model.addConstr(U_SELECT[u] >=0, name="positif constraint")
 
